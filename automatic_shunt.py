@@ -27,7 +27,8 @@ class automaticShunt(currency.starUpChrome):
         for i in li:
             l=currency.weiExcel(i,'detail').e_read(1,'lieB')[1:]
             excel_cols1+=l
-            currency.os.remove(i)            
+            currency.os.remove(i)
+            #print(i,excel_cols1)
         return excel_cols1
 
     def go_shunt(self):
@@ -90,20 +91,31 @@ class automaticShunt(currency.starUpChrome):
                 url=f'https://zizhanghao.taobao.com/subaccount/qianniu/offlineDispatchAjaxHandler.htm?method=doGetOfflineDispathRecords&{kv}'
                 url1=f'https://zizhanghao.taobao.com/subaccount/qianniu/offlineDispatchAjaxHandler.htm?method=doReDispatch&{kv}'
         headers['cookie']='; '.join(cookies1)
-        li=[]
+        li={}
         pagenum=1
         while 1:
             data['currentPage']=f'{pagenum}'
             req=requests.post(url,data=data,headers=headers).json()
             for i in req['data']['list']:
-                if i['account'] in wangwang: li+=[i['id']]
+                if i['account'] in wangwang: li[i['id']]=i['account']
             print(f"第{pagenum}页，共有数据{len(req['data']['list'])}条")
             if len(req['data']['list'])<10: break
             pagenum+=1
         print(len(li),103)
+        #print('旺旺*********：',wangwang)
         for i in li:
+            zdfl=currency.weiConfig('.\cof\peizhi').c_read('config','指定分流的帐号id')
+            if zdfl:
+                data1={'site':'0','ids':i,'rangeType':'1','rangePerson':zdfl}
+                req=requests.post(url1,data=data1,headers=headers).json()
+                if req['msg']=='重新分流完成':
+                    print(f'{li[i]}分流成功')
+                    continue
+                else:print(f'{li[i]}分流失败111111')
             data1={'site':'','ids':i}
-            requests.post(url1,data=data1,headers=headers)
+            requests.post(url1,data=data1,headers=headers).json()
+            if req['msg']=='重新分流完成':print(f'{li[i]}分流成功')
+            else:print(f'{li[i]}分流失败222222')
 
     def page_turning(self):
         '''翻页'''
@@ -120,17 +132,19 @@ class automaticShunt(currency.starUpChrome):
                 self.driver.find_element_by_xpath("//span[contains(text(),'下载下单未付款名单')]").click()
                 currency.time.sleep(5)
             if x2:
-                self.driver.find_element_by_xpath("//span[contains(text(),'下载下单未付款名单')]").click()
+                self.driver.find_element_by_xpath("//span[contains(text(),'下载未下单高意愿名单')]").click()
                 currency.time.sleep(5)
             if x3:
-                self.driver.find_element_by_xpath("//span[contains(text(),'下载下单未付款名单')]").click()
+                self.driver.find_element_by_xpath("//span[contains(text(),'下载其他未下单名单')]").click()
                 currency.time.sleep(5)
             excel_cols1=self.get_wangwang()#调用获取旺旺
-        currency.time.sleep(60*5)#******等待时间5分钟
+        delay_time=currency.weiConfig('.\cof\peizhi').c_read('config','分流延时（秒）')
+        currency.time.sleep(int(delay_time))#同通配置文件设置延时时间
         self.go_shunt()#调用转到分流
         if qbfl: self.all_shunt()#调用全部分流
         else:
             self.part_shunt1(excel_cols1)#调用部分分流
+        self.driver.get('https://refund2.tmall.com/dispute/sellerDisputeList.htm')
         currency.time.sleep(10)
 
     def cs001(self):

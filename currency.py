@@ -104,4 +104,8 @@ class weiConfig:
 #配置文件如果含有换行用TAB缩进就可以。
 
 if __name__ == "__main__":
-    pass
+    #a=starUpChrome()
+    #a.star_driver()
+    b=weiConfig('.\cof\peizhi')
+    c=b.c_read('config','分流延时（秒）')
+    print(int(c))

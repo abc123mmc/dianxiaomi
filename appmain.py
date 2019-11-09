@@ -87,18 +87,21 @@ class Ui_Form(automatic_shunt.automaticShunt,object):
             latest_date=''
             self.new_page()#调用打开新页面
             while 1:
-                x1=self.checkBox.isChecked()
-                x2=self.checkBox_2.isChecked()
-                x3=self.checkBox_3.isChecked()
-                x4=self.checkBox_4.isChecked()
-                automatic_shunt.currency.time.sleep(3)
-                if not self.panduan002:
-                    continue
-                try:latest_date2=self.go_dianxiaomi(latest_date='')#调用打开店小蜜
-                except:pass
-                if latest_date!=latest_date2:
-                    self.run(x1,x2,x3,x4)
-                    latest_date=latest_date2
+                try:
+                    x1=self.checkBox.isChecked()
+                    x2=self.checkBox_2.isChecked()
+                    x3=self.checkBox_3.isChecked()
+                    x4=self.checkBox_4.isChecked()
+                    automatic_shunt.currency.time.sleep(3)
+                    if not self.panduan002:
+                        continue
+                    try:latest_date2=self.go_dianxiaomi(latest_date='')#调用打开店小蜜
+                    except:pass
+                    if latest_date!=latest_date2:
+                        self.run(x1,x2,x3,x4)
+                        latest_date=latest_date2
+                except:
+                    automatic_shunt.currency.Ri_zhi()
             
 
     def slot3(self):
